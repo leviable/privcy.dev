@@ -1,2 +1,2 @@
 # privcy.dev
-privcy.dev website development
+Landing page for privcy.dev

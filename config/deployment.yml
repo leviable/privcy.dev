@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: privcy-dev-svc
+spec:
+  ports:
+    - port: 80
+      targetPort: 5000
+  selector:
+    app: privcy-dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: privcy-dev
+  labels:
+    app: privcy-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: privcy-dev
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: privcy-dev
+    spec:
+      containers:
+      - name: privcy-dev
+        image: <IMAGE>
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 100m
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: privcy-dev-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - privcy.dev
+    secretName: privcy-dev-tls
+  rules:
+    - host: privcy.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: privcy-dev-svc
+                port:
+                  number: 5000
